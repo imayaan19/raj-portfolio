@@ -1,0 +1,24 @@
+# Local Postgres for development.
+# Usage:  docker compose up -d      (then set DATABASE_URL in .env to the line below)
+# DATABASE_URL="postgresql://postgres:postgres@localhost:5432/campus?schema=public"
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: campus-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: campus
+    ports:
+      - '5432:5432'
+    volumes:
+      - campus_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  campus_pgdata:

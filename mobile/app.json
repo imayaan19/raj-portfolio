@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Campus Companion",
+    "slug": "campus-companion",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "campuscompanion",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#4F46E5"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.campuscompanion.app"
+    },
+    "android": {
+      "package": "com.campuscompanion.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#4F46E5"
+      }
+    },
+    "plugins": ["expo-notifications"],
+    "extra": {
+      "apiUrl": "http://localhost:4000"
+    }
+  }
+}

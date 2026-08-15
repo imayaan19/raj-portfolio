@@ -1,0 +1,22 @@
+# This repo tracks the Campus Companion app only (backend/ + mobile/).
+# Other projects living in this folder are intentionally excluded.
+/apollo-maternify/
+/focus-flow/
+/portfolio-landing/
+/.claude/
+
+# Dependencies / build output (also covered by nested .gitignores)
+node_modules/
+dist/
+.expo/
+web-build/
+
+# Secrets & env
+.env
+.env.local
+*.local
+
+# Logs & OS junk
+*.log
+.DS_Store
+Thumbs.db

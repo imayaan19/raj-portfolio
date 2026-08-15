@@ -1,0 +1,123 @@
+// Prisma schema — Campus Companion
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String? // null for Google-only accounts
+  googleId     String?  @unique
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gmailAccount GmailAccount?
+  expenses     Expense[]
+  workouts     Workout[]
+  routines     Routine[]
+  reminders    Reminder[]
+  preReads     PreRead[]
+}
+
+// Stores the OAuth tokens used to read the user's Gmail inbox.
+// NOTE: encrypt these at rest in production (see services/crypto).
+model GmailAccount {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email        String?
+  accessToken  String?
+  refreshToken String?
+  expiryDate   DateTime?
+  lastSyncedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Expense {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Float
+  category  String
+  note      String?
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model Workout {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  date      DateTime @default(now())
+  notes     String?
+  // [{ name, sets, reps, weight }]
+  exercises Json     @default("[]")
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model Routine {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  isPreset  Boolean  @default(false)
+  // [{ name, sets, reps }]
+  exercises Json     @default("[]")
+  createdAt DateTime @default(now())
+}
+
+enum ReminderSource {
+  manual
+  gmail
+}
+
+enum ReminderStatus {
+  pending
+  done
+}
+
+model Reminder {
+  id             String         @id @default(cuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  course         String?
+  sender         String?
+  dueDate        DateTime?
+  source         ReminderSource @default(manual)
+  status         ReminderStatus @default(pending)
+  gmailMessageId String? // dedupe key for synced items
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([userId, gmailMessageId])
+  @@index([userId, status])
+}
+
+model PreRead {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title               String
+  source              String?
+  keyProblems         String?
+  coreAnalysis        String?
+  actionableTakeaways String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
