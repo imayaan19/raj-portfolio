@@ -1,11 +1,13 @@
 # Render Blueprint — one web service + a free Postgres database.
-# New → Blueprint → select this repo. Fill secret vars in the dashboard.
+# Must live at the REPO ROOT for Render to auto-detect it.
+# Deploy: Render Dashboard → New → Blueprint → select this repo.
+# Then fill the secret vars (GOOGLE_*) in the dashboard.
 services:
   - type: web
     name: campus-companion-api
     runtime: node
     plan: free
-    rootDir: backend
+    rootDir: backend # build/run from the backend/ subfolder
     buildCommand: npm install && npm run build
     startCommand: npx prisma migrate deploy && npm run start
     healthCheckPath: /health
@@ -17,17 +19,19 @@ services:
           name: campus-companion-db
           property: connectionString
       - key: JWT_SECRET
-        generateValue: true
+        generateValue: true # Render generates a strong secret
       - key: JWT_EXPIRES_IN
         value: 30d
       - key: GOOGLE_CLIENT_ID
-        sync: false
+        sync: false # set manually in dashboard (secret)
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: GOOGLE_REDIRECT_URI
         sync: false
       - key: GMAIL_KEYWORDS
         value: feedback,evaluation,survey,deadline,course review
+      - key: GMAIL_SEARCH_SCOPE
+        value: subject
 
 databases:
   - name: campus-companion-db

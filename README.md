@@ -56,7 +56,7 @@ See [`backend/.env.example`](backend/.env.example) and the "Google setup" sectio
 
 ## Deploy (Render)
 
-`backend/render.yaml` provisions a web service + a free Postgres instance. Push to a
+`render.yaml` (at the repo root) provisions a web service + a free Postgres instance. Push to a
 GitHub repo, then in Render: **New → Blueprint → pick the repo**. Set the secret env
 vars (`JWT_SECRET`, `GOOGLE_*`) in the dashboard.
 
