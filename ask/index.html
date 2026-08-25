@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>A little question for you…</title>
+
+<!-- ===== Fonts ===== -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<!-- ===== Confetti ===== -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+  /* ============================================================
+     THEME TOKENS
+  ============================================================ */
+  :root{
+    --bg1:#fdeef1;
+    --bg2:#fbe0e7;
+    --card:#ffffff;
+    --wine:#4a1525;
+    --wine-soft:#7c3a4d;
+    --rose:#e89ba6;
+    --rose-deep:#d9788f;
+    --rose-deeper:#c85f79;
+    --shadow:0 24px 60px -18px rgba(120, 30, 55, 0.35);
+    --ring:rgba(217,120,143,0.35);
+    --serif:'Playfair Display', Georgia, 'Times New Roman', serif;
+    --sans:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+
+  body{
+    font-family:var(--sans);
+    color:var(--wine);
+    background:linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 100%);
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* ============================================================
+     FLOATING HEARTS
+  ============================================================ */
+  .hearts{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .hearts span{
+    position:absolute;
+    bottom:-40px;
+    font-size:18px;
+    opacity:0;
+    animation:floatUp linear infinite;
+    filter:saturate(1.1);
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) scale(0.6) rotate(0deg); opacity:0; }
+    10%{ opacity:.7; }
+    90%{ opacity:.5; }
+    100%{ transform:translateY(-110vh) scale(1.1) rotate(40deg); opacity:0; }
+  }
+
+  /* ============================================================
+     CARD
+  ============================================================ */
+  .card{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:420px;
+    background:var(--card);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+    padding:38px 30px 34px;
+    text-align:center;
+    animation:cardIn .7s cubic-bezier(.18,.9,.3,1.2) both;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform:translateY(24px) scale(.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  /* screen fade transitions */
+  .screen{ animation:fadeIn .5s ease both; }
+  .screen.leaving{ animation:fadeOut .35s ease both; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes fadeOut{ from{opacity:1;} to{opacity:0; transform:translateY(-8px);} }
+  .hidden{ display:none !important; }
+
+  /* ============================================================
+     TYPOGRAPHY
+  ============================================================ */
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(24px, 6.5vw, 30px);
+    line-height:1.22;
+    color:var(--wine);
+    margin:6px 0 4px;
+    letter-spacing:.2px;
+  }
+  .sub{
+    font-size:14px;
+    color:var(--wine-soft);
+    margin:0 0 22px;
+    font-weight:400;
+  }
+  .badge{ font-size:40px; line-height:1; margin-bottom:2px; }
+
+  .gif{
+    width:150px; height:150px; object-fit:cover;
+    border-radius:20px; margin:6px auto 20px; display:block;
+    box-shadow:0 12px 26px -12px rgba(120,30,55,.4);
+    background:#ffeef2;
+  }
+
+  /* ============================================================
+     BUTTONS
+  ============================================================ */
+  .btn{
+    font-family:var(--sans);
+    font-weight:600;
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    color:#fff;
+    background:linear-gradient(180deg, var(--rose) 0%, var(--rose-deep) 100%);
+    box-shadow:0 10px 22px -8px rgba(200,95,121,.7);
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn:hover{ background:linear-gradient(180deg, var(--rose-deep) 0%, var(--rose-deeper) 100%); }
+
+  .actions{
+    display:flex; align-items:center; justify-content:center;
+    gap:16px; flex-wrap:wrap; min-height:70px; position:relative;
+  }
+
+  #yesBtn{
+    font-size:18px;
+    padding:14px 34px;
+    transform-origin:center;
+    transition:transform .2s cubic-bezier(.2,.8,.3,1.4), font-size .2s, padding .2s, box-shadow .2s;
+  }
+  #noBtn{
+    font-size:15px;
+    padding:12px 26px;
+    background:linear-gradient(180deg,#f3c3cc 0%, #e6a6b3 100%);
+    color:var(--wine);
+    box-shadow:0 8px 18px -10px rgba(120,30,55,.5);
+    transition:transform .18s ease, font-size .18s, padding .18s;
+  }
+  #noBtn.floating{ position:fixed; z-index:50; margin:0; }
+
+  /* ============================================================
+     STEP 2 — FORM
+  ============================================================ */
+  .field{ text-align:left; margin:0 0 18px; }
+  .field label{
+    display:block;
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:15px;
+    color:var(--wine);
+    margin-bottom:8px;
+  }
+  .control{
+    width:100%;
+    font-family:var(--sans);
+    font-size:15px;
+    color:var(--wine);
+    padding:13px 15px;
+    border:1.5px solid #f0d2d9;
+    border-radius:14px;
+    background:#fff url('data:image/svg+xml;utf8,') no-repeat;
+    outline:none;
+    transition:border-color .2s, box-shadow .2s;
+    -webkit-appearance:none; appearance:none;
+  }
+  .control:focus{ border-color:var(--rose-deep); box-shadow:0 0 0 4px var(--ring); }
+  select.control{
+    background-image:url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='14'%20height='9'%3E%3Cpath%20d='M1%201l6%206%206-6'%20stroke='%23c85f79'%20stroke-width='2'%20fill='none'%20stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 16px center;
+    padding-right:40px;
+  }
+
+  #lockBtn{ width:100%; font-size:17px; padding:15px; margin-top:6px; }
+
+  /* ---- Vibe / activity picker ---- */
+  .vibes{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:6px 0 22px; }
+  .vibe{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:6px; text-align:center;
+    padding:18px 10px;
+    border:1.5px solid #f0d2d9;
+    border-radius:18px;
+    background:#fff;
+    cursor:pointer;
+    transition:transform .15s ease, border-color .2s, box-shadow .2s, background .2s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .vibe:active{ transform:scale(.97); }
+  .vibe .emoji{ font-size:30px; line-height:1; }
+  .vibe .label{ font-size:13.5px; font-weight:600; color:var(--wine); line-height:1.25; }
+  .vibe.selected{
+    border-color:var(--rose-deep);
+    background:#fff5f7;
+    box-shadow:0 0 0 4px var(--ring);
+    transform:translateY(-2px);
+  }
+  #vibeBtn{ width:100%; font-size:17px; padding:15px; margin-top:2px; }
+
+  .final-emoji{ font-size:52px; margin-bottom:6px; }
+  .summary{
+    background:#fdeef1;
+    border-radius:16px;
+    padding:16px 18px;
+    margin:18px 0 22px;
+    font-size:15px;
+    color:var(--wine);
+    line-height:1.6;
+  }
+  .summary b{ color:var(--rose-deeper); }
+
+  .share{
+    display:flex; flex-direction:column; gap:10px; margin-top:4px;
+  }
+  .btn.ghost{
+    background:#fff; color:var(--rose-deeper);
+    border:1.5px solid var(--rose);
+    box-shadow:none; font-size:15px; padding:13px;
+  }
+  .btn.ghost:hover{ background:#fff5f7; }
+  .wa{ background:linear-gradient(180deg,#3ecf6b,#25a54e); box-shadow:0 10px 22px -8px rgba(37,165,78,.6); font-size:15px; padding:14px; }
+  .wa:hover{ background:linear-gradient(180deg,#33bd60,#1f9345); }
+
+  .foot{ margin-top:18px; font-size:12px; color:#c99aa8; }
+</style>
+</head>
+<body>
+
+<!-- floating hearts injected by JS -->
+<div class="hearts" id="hearts" aria-hidden="true"></div>
+
+<div class="card">
+
+  <!-- ================= STEP 1 : THE QUESTION ================= -->
+  <section class="screen" id="step1">
+    <div class="badge">💌</div>
+    <h1 id="questionText">Will you go on a date with me?</h1>
+    <p class="sub" id="subText">No pressure… okay, maybe a little 🥺</p>
+    <img class="gif" id="mainGif" alt="cute sticker" />
+    <div class="actions" id="actions">
+      <button class="btn" id="yesBtn">Yes 💖</button>
+      <button class="btn" id="noBtn">No</button>
+    </div>
+  </section>
+
+  <!-- ================= STEP 2 : AVAILABILITY ================= -->
+  <section class="screen hidden" id="step2">
+    <div class="badge">📅🐾</div>
+    <h1>So… when are you free?</h1>
+    <p class="sub">Pick a moment and I'll make it special ✨</p>
+
+    <div class="field">
+      <label for="dateInput">Pick a Day 🗓️</label>
+      <input type="date" id="dateInput" class="control" />
+    </div>
+
+    <div class="field">
+      <label for="slotInput">Pick a Time 🕐</label>
+      <select id="slotInput" class="control">
+        <option value="Lunch / Afternoon">Lunch / Afternoon ☀️</option>
+        <option value="Dinner / Evening" selected>Dinner / Evening 🌆</option>
+        <option value="All Day">All Day 💫</option>
+        <option value="Surprise Me!">Surprise Me! 🎁</option>
+      </select>
+    </div>
+
+    <button class="btn" id="lockBtn">Lock it in! 💖</button>
+  </section>
+
+  <!-- ================= STEP 2b : THE VIBE ================= -->
+  <section class="screen hidden" id="step2b">
+    <div class="badge">💫</div>
+    <h1>What are you looking for?</h1>
+    <p class="sub">Pick the vibe — I'll take care of the rest 😌</p>
+
+    <div class="vibes" id="vibes">
+      <div class="vibe" data-vibe="Movie Date 🎬">
+        <span class="emoji">🎬</span><span class="label">Movie date</span>
+      </div>
+      <div class="vibe" data-vibe="Your Favourite Cuisine 🍽️">
+        <span class="emoji">🍜</span><span class="label">Your favourite cuisine</span>
+      </div>
+      <div class="vibe" data-vibe="Arcade 🕹️">
+        <span class="emoji">🕹️</span><span class="label">Arcade</span>
+      </div>
+      <div class="vibe" data-vibe="We'll plan it together 💭">
+        <span class="emoji">💭</span><span class="label">We'll plan together</span>
+      </div>
+    </div>
+
+    <button class="btn" id="vibeBtn">That's the one! 💖</button>
+  </section>
+
+  <!-- ================= STEP 3 : CONFIRMATION ================= -->
+  <section class="screen hidden" id="step3">
+    <div class="final-emoji">🎉</div>
+    <h1>It's a date!</h1>
+    <p class="sub">Can't wait to see you 💕</p>
+    <div class="summary" id="summary"></div>
+    <div class="share">
+      <button class="btn wa hidden" id="waBtn">Send it on WhatsApp 💬</button>
+      <button class="btn ghost" id="calBtn">Add to Calendar 📆</button>
+    </div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script>
+/* ============================================================
+   ⚙️  CONFIG — edit these
+============================================================ */
+const CONFIG = {
+  recipientName: "Dhapus",             // her name
+  senderName:    "Ayaan",              // your name
+  whatsappNumber:"917980903899",       // country code, no +. Leave "" to hide.
+  questionText:  "Will you go on a date with me?",
+  initialGifUrl:    "https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif",         // cute cat with big pleading eyes 🥺
+  celebrationGifUrl:"https://media.giphy.com/media/3oEjHV0z8S7WM4MwnK/giphy.gif"     // SpongeBob happy dance 🎉
+};
+
+/* ============================================================
+   Apply config to the DOM
+============================================================ */
+document.getElementById('questionText').textContent = CONFIG.questionText;
+document.getElementById('mainGif').src = CONFIG.initialGifUrl;
+document.getElementById('foot').textContent = "made with 💗 by " + CONFIG.senderName;
+
+/* Personalize sub-line with her name */
+document.getElementById('subText').textContent =
+  "No pressure, " + CONFIG.recipientName + "… okay, maybe a little 🥺";
+
+/* ============================================================
+   Floating hearts
+============================================================ */
+(function makeHearts(){
+  const wrap = document.getElementById('hearts');
+  const glyphs = ['💗','💕','💖','🩷','❤️','💘'];
+  for(let i=0;i<14;i++){
+    const s = document.createElement('span');
+    s.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.fontSize = (14 + Math.random()*22) + 'px';
+    s.style.animationDuration = (7 + Math.random()*9) + 's';
+    s.style.animationDelay = (Math.random()*8) + 's';
+    wrap.appendChild(s);
+  }
+})();
+
+/* ============================================================
+   STEP 1 — Evasive "No" button
+============================================================ */
+const yesBtn = document.getElementById('yesBtn');
+const noBtn  = document.getElementById('noBtn');
+
+let dodges = 0;
+let yesScale = 1;
+
+function dodge(){
+  const pad = 12;
+  const bw = noBtn.offsetWidth  || 90;
+  const bh = noBtn.offsetHeight || 44;
+  const maxX = window.innerWidth  - bw - pad;
+  const maxY = window.innerHeight - bh - pad;
+
+  const x = Math.max(pad, Math.random() * maxX);
+  const y = Math.max(pad, Math.random() * maxY);
+
+  noBtn.classList.add('floating');
+  noBtn.style.left = x + 'px';
+  noBtn.style.top  = y + 'px';
+
+  // (text stays "No" — no phrase cycling)
+  dodges++;
+
+  // Shrink No, grow Yes
+  const noScale = Math.max(0.55, 1 - dodges*0.07);
+  noBtn.style.transform = `scale(${noScale})`;
+
+  yesScale = Math.min(1.9, 1 + dodges*0.12);
+  yesBtn.style.transform = `scale(${yesScale})`;
+}
+
+/* trigger on hover (desktop) and touch/tap (mobile) */
+noBtn.addEventListener('mouseenter', dodge);
+noBtn.addEventListener('mousedown', function(e){ e.preventDefault(); dodge(); });
+noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); dodge(); }, {passive:false});
+noBtn.addEventListener('click', function(e){ e.preventDefault(); dodge(); });
+
+/* ============================================================
+   YES → confetti + go to Step 2
+============================================================ */
+yesBtn.addEventListener('click', function(){
+  burstConfetti();
+  // flash the celebration gif + happy line before transitioning
+  document.getElementById('mainGif').src = CONFIG.celebrationGifUrl;
+  document.getElementById('questionText').textContent = "Yay! I knew it 🥰";
+  document.getElementById('subText').textContent = "Give me one sec…";
+  const s1 = document.getElementById('step1');
+  // let the happy-dance gif + confetti breathe, then fade to step 2
+  setTimeout(function(){ s1.classList.add('leaving'); }, 950);
+  setTimeout(function(){
+    s1.classList.add('hidden');
+    const s2 = document.getElementById('step2');
+    s2.classList.remove('hidden');
+    // default the date to tomorrow
+    const t = new Date(); t.setDate(t.getDate()+1);
+    document.getElementById('dateInput').value = t.toISOString().slice(0,10);
+    document.getElementById('dateInput').min = new Date().toISOString().slice(0,10);
+  }, 1300);
+});
+
+function burstConfetti(){
+  if(typeof confetti !== 'function') return;
+  const colors = ['#e89ba6','#d9788f','#c85f79','#ffd1dc','#fff'];
+  confetti({ particleCount:140, spread:80, origin:{y:0.6}, colors });
+  setTimeout(()=>confetti({ particleCount:90, angle:60,  spread:70, origin:{x:0}, colors }),150);
+  setTimeout(()=>confetti({ particleCount:90, angle:120, spread:70, origin:{x:1}, colors }),150);
+}
+
+/* ============================================================
+   STEP 2 (date/time) → STEP 2b (vibe) → Confirmation
+============================================================ */
+let chosen = { dateISO:"", dateNice:"", slot:"", vibe:"" };
+
+/* Step 2 → Step 2b */
+document.getElementById('lockBtn').addEventListener('click', function(){
+  const dateVal = document.getElementById('dateInput').value;
+  const slotVal = document.getElementById('slotInput').value;
+  if(!dateVal){ alert("Pick a day first 🥺"); return; }
+
+  const d = new Date(dateVal + 'T00:00:00');
+  chosen.dateISO  = dateVal;
+  chosen.dateNice = d.toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+  chosen.slot     = slotVal;
+
+  const s2 = document.getElementById('step2');
+  s2.classList.add('leaving');
+  setTimeout(function(){
+    s2.classList.add('hidden');
+    document.getElementById('step2b').classList.remove('hidden');
+  }, 360);
+});
+
+/* Step 2b — vibe selection */
+const vibeCards = document.querySelectorAll('#vibes .vibe');
+vibeCards.forEach(function(card){
+  card.addEventListener('click', function(){
+    vibeCards.forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    chosen.vibe = card.getAttribute('data-vibe');
+  });
+});
+
+/* Step 2b → Confirmation */
+document.getElementById('vibeBtn').addEventListener('click', function(){
+  if(!chosen.vibe){ alert("Pick a vibe first 🥺"); return; }
+
+  burstConfetti();
+
+  const s2b = document.getElementById('step2b');
+  s2b.classList.add('leaving');
+  setTimeout(function(){
+    s2b.classList.add('hidden');
+    document.getElementById('summary').innerHTML =
+      "📅 <b>" + chosen.dateNice + "</b><br>🕐 <b>" + chosen.slot + "</b><br>💫 <b>" + chosen.vibe + "</b>";
+    document.getElementById('step3').classList.remove('hidden');
+    setupShare();
+  }, 360);
+});
+
+/* ============================================================
+   STEP 3 — Share actions (WhatsApp + Calendar)
+============================================================ */
+function setupShare(){
+  const msg =
+    "Yay! It's a date 🎉 " + CONFIG.recipientName + " + " + CONFIG.senderName +
+    " — " + chosen.dateNice + ", " + chosen.slot +
+    ". Vibe: " + chosen.vibe + ". Can't wait! 💕";
+
+  // WhatsApp
+  const waBtn = document.getElementById('waBtn');
+  if(CONFIG.whatsappNumber){
+    waBtn.classList.remove('hidden');
+    const url = "https://wa.me/" + CONFIG.whatsappNumber + "?text=" + encodeURIComponent(msg);
+    waBtn.onclick = () => window.open(url, '_blank');
+  }
+
+  // Calendar (.ics download)
+  document.getElementById('calBtn').onclick = () => downloadICS(msg);
+}
+
+function downloadICS(desc){
+  // build all-day-ish event with a rough time based on slot
+  const timeMap = { "Lunch / Afternoon":"13", "Dinner / Evening":"19", "All Day":"10", "Surprise Me!":"18" };
+  const hour = timeMap[chosen.slot] || "19";
+  const start = chosen.dateISO.replace(/-/g,'') + "T" + hour + "0000";
+  const endH  = String(Number(hour)+2).padStart(2,'0');
+  const end   = chosen.dateISO.replace(/-/g,'') + "T" + endH + "0000";
+
+  const ics =
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DateInvite//EN
+BEGIN:VEVENT
+UID:${Date.now()}@dateinvite
+DTSTAMP:${start}
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:Date with ${CONFIG.senderName} 💕
+DESCRIPTION:${desc}
+END:VEVENT
+END:VCALENDAR`;
+
+  const blob = new Blob([ics], {type:'text/calendar'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'our-date.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+</script>
+</body>
+</html>
