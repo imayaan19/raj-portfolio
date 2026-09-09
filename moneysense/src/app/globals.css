@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --primary: 158 64% 40%;          /* emerald — money/growth */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 222 47% 11%;        /* deep slate */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 158 64% 95%;
+  --accent-foreground: 158 64% 25%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 158 64% 40%;
+  --success: 158 64% 40%;
+  --warning: 38 92% 50%;
+  --danger: 0 72% 51%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 222 47% 8%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  --primary: 158 64% 45%;
+  --primary-foreground: 222 47% 8%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 158 40% 18%;
+  --accent-foreground: 158 64% 80%;
+  --border: 217 33% 20%;
+  --input: 217 33% 20%;
+  --ring: 158 64% 45%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin, unobtrusive scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 8px;
+}
+
+.card-grid {
+  display: grid;
+  gap: 1rem;
+}
