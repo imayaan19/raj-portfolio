@@ -16,7 +16,8 @@ import {
   Alert,
   EmptyState,
 } from "@/components/ui";
-import { DonutChart, BarChart, LineChart, CHART_COLORS } from "@/components/charts";
+import { DonutChart, BarChart, LineChart } from "@/components/charts";
+import { CHART_COLORS } from "@/lib/chart-colors";
 import { PageHeader } from "@/components/PageHeader";
 import {
   Droplets,

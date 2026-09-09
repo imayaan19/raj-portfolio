@@ -5,7 +5,8 @@ import { upsertInvestment, deleteInvestment } from "@/lib/actions";
 import type { Investment, Goal } from "@/lib/types";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label, Select, Badge, EmptyState } from "@/components/ui";
-import { DonutChart, CHART_COLORS } from "@/components/charts";
+import { DonutChart } from "@/components/charts";
+import { CHART_COLORS } from "@/lib/chart-colors";
 import { Plus, Trash2, Pencil, TrendingUp, X } from "lucide-react";
 
 const ASSET_CLASSES = ["Equity", "Debt", "Cash", "Gold", "Other"];

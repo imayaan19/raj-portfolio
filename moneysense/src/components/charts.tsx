@@ -16,21 +16,7 @@ import {
   Legend,
 } from "recharts";
 import { formatCompact } from "@/lib/format";
-
-// A calm, accessible categorical palette (emerald-anchored).
-export const CHART_COLORS = [
-  "#10b981",
-  "#3b82f6",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ec4899",
-  "#14b8a6",
-  "#ef4444",
-  "#6366f1",
-  "#84cc16",
-  "#f97316",
-  "#64748b",
-];
+import { CHART_COLORS } from "@/lib/chart-colors";
 
 const tooltipStyle = {
   borderRadius: 12,

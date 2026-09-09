@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { simulateScenarios } from "@/lib/finance";
 import { formatCurrency } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle, Input, Label, Alert } from "@/components/ui";
-import { LineChart, CHART_COLORS } from "@/components/charts";
+import { LineChart } from "@/components/charts";
+import { CHART_COLORS } from "@/lib/chart-colors";
 
 export function InvestmentSimulator({
   currency,

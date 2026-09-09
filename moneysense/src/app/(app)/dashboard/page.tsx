@@ -24,7 +24,8 @@ import {
 } from "@/lib/finance";
 import { formatCurrency, formatPercent, signedPercent } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle, StatCard, Badge, EmptyState, Button } from "@/components/ui";
-import { DonutChart, BarChart, CHART_COLORS } from "@/components/charts";
+import { DonutChart, BarChart } from "@/components/charts";
+import { CHART_COLORS } from "@/lib/chart-colors";
 import { PageHeader } from "@/components/PageHeader";
 
 export const dynamic = "force-dynamic";
