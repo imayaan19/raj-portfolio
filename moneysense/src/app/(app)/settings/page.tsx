@@ -4,11 +4,16 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label, Select, Alert } from "@/components/ui";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SmsImportPanel } from "@/components/SmsImportPanel";
+import { GmailImportPanel } from "@/components/GmailImportPanel";
 import { ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: { gmail?: string };
+}) {
   const { ctx } = await getFinanceContext();
   const p = ctx.profile;
   const f = ctx.financial;
@@ -119,6 +124,13 @@ export default async function SettingsPage() {
           <Button type="submit">Save changes</Button>
         </div>
       </form>
+
+      <GmailImportPanel
+        connected={!!p?.gmail_refresh_token}
+        email={p?.gmail_email ?? null}
+        lastSync={p?.gmail_last_sync ?? null}
+        notice={searchParams?.gmail ?? null}
+      />
 
       <SmsImportPanel
         token={p?.ingest_token ?? null}
