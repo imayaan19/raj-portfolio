@@ -17,7 +17,11 @@ import {
 } from "./finance";
 
 export function hasOpenAI(): boolean {
-  return !!process.env.OPENAI_API_KEY;
+  const key = process.env.OPENAI_API_KEY?.trim();
+  // Treat a missing key, or the .env.example placeholder, as "no key" so the
+  // app cleanly falls back to rule-based mode instead of calling OpenAI with an
+  // obviously-invalid key (which returns a 401).
+  return !!key && key.startsWith("sk-") && !key.includes("your-openai-key");
 }
 
 function client(): OpenAI {

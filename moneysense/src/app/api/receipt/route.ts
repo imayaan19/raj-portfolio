@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 import { suggestCategory } from "@/lib/categorize";
+import { hasOpenAI } from "@/lib/ai";
 
 // Extracts structured expense fields from an uploaded receipt image using
 // OpenAI vision. Returns a draft the user must confirm — never auto-saves.
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Image is too large." }, { status: 413 });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  if (!hasOpenAI()) {
     return NextResponse.json({
       draft: null,
       note: "Receipt scanning needs an OpenAI API key. You can still enter the expense manually.",
