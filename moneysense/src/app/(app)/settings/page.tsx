@@ -3,6 +3,7 @@ import { updateProfile } from "@/lib/actions";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label, Select, Alert } from "@/components/ui";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
+import { SmsImportPanel } from "@/components/SmsImportPanel";
 import { ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -118,6 +119,11 @@ export default async function SettingsPage() {
           <Button type="submit">Save changes</Button>
         </div>
       </form>
+
+      <SmsImportPanel
+        token={p?.ingest_token ?? null}
+        appUrl={process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}
+      />
 
       <Card className="border-red-200 dark:border-red-900/50">
         <CardHeader>

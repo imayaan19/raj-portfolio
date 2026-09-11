@@ -21,6 +21,8 @@ create table if not exists public.profiles (
   risk_profile    text default 'moderate',   -- conservative | moderate | growth | aggressive
   onboarded       boolean default false,
   employment_type text,
+  ingest_token    text unique,               -- secret token for the SMS/email import webhook
+
   created_at      timestamptz default now(),
   updated_at      timestamptz default now()
 );

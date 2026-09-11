@@ -65,6 +65,7 @@ export interface Profile {
   risk_profile: RiskProfile;
   onboarded: boolean;
   employment_type: string | null;
+  ingest_token?: string | null;
   created_at?: string;
   updated_at?: string;
 }

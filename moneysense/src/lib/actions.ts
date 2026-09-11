@@ -255,6 +255,22 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
+// ------------------------- SMS import token --------------------------------
+// Generates (or rotates) the secret token used by the SMS import webhook.
+export async function generateIngestToken() {
+  const { supabase, user } = await requireUser();
+  const token = `mstk_${crypto.randomUUID().replace(/-/g, "")}${crypto
+    .randomUUID()
+    .replace(/-/g, "")
+    .slice(0, 8)}`;
+  const { error } = await supabase
+    .from("profiles")
+    .update({ ingest_token: token })
+    .eq("id", user.id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/settings");
+}
+
 // --------------------------- Notifications ---------------------------------
 export async function markAllNotificationsRead() {
   const { supabase, user } = await requireUser();
