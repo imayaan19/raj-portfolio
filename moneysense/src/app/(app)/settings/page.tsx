@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label, Select,
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { SmsImportPanel } from "@/components/SmsImportPanel";
 import { GmailImportPanel } from "@/components/GmailImportPanel";
+import { googleConfigured } from "@/lib/google";
 import { ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -129,6 +130,7 @@ export default async function SettingsPage({
         connected={!!p?.gmail_refresh_token}
         email={p?.gmail_email ?? null}
         lastSync={p?.gmail_last_sync ?? null}
+        configured={googleConfigured()}
         notice={searchParams?.gmail ?? null}
       />
 

@@ -5,9 +5,8 @@ import { syncGmailForUser } from "@/lib/gmail-sync";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-// Scheduled daily sync for every connected user. Invoked by Vercel Cron.
-// Protected by CRON_SECRET: Vercel automatically sends it as a Bearer token
-// when a CRON_SECRET env var is configured.
+// Daily auto-sync for every connected user. Configured in vercel.json.
+// Vercel injects CRON_SECRET as a Bearer token on scheduled invocations.
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
   const auth = request.headers.get("authorization");
@@ -19,7 +18,7 @@ export async function GET(request: Request) {
   try {
     admin = createAdminClient();
   } catch {
-    return NextResponse.json({ error: "Service role not configured." }, { status: 500 });
+    return NextResponse.json({ error: "No service role key" }, { status: 500 });
   }
 
   const { data: users } = await admin
