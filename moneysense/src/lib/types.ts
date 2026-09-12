@@ -66,6 +66,9 @@ export interface Profile {
   onboarded: boolean;
   employment_type: string | null;
   ingest_token?: string | null;
+  gmail_refresh_token?: string | null;
+  gmail_email?: string | null;
+  gmail_last_sync?: string | null;
   created_at?: string;
   updated_at?: string;
 }

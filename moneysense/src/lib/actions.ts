@@ -271,6 +271,17 @@ export async function generateIngestToken() {
   revalidatePath("/settings");
 }
 
+// ---------------------------- Gmail import ---------------------------------
+export async function disconnectGmail() {
+  const { supabase, user } = await requireUser();
+  await supabase
+    .from("profiles")
+    .update({ gmail_refresh_token: null, gmail_email: null })
+    .eq("id", user.id);
+  await supabase.from("gmail_messages").delete().eq("user_id", user.id);
+  revalidatePath("/settings");
+}
+
 // --------------------------- Notifications ---------------------------------
 export async function markAllNotificationsRead() {
   const { supabase, user } = await requireUser();
