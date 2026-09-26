@@ -58,6 +58,8 @@ export async function syncGmailForUser(
       notes: "Auto-imported from Gmail",
       recurring: false,
       source: "Email",
+      explained: false, // auto-imported → needs the user's confirmation
+      confidence: 0.5,
     });
     if (!error) imported += 1;
   }

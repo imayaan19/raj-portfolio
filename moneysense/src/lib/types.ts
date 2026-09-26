@@ -15,7 +15,8 @@ export type TransactionSource =
   | "Credit Card"
   | "UPI"
   | "SMS"
-  | "Email";
+  | "Email"
+  | "Account Aggregator";
 
 export type RiskProfile = "conservative" | "moderate" | "growth" | "aggressive";
 
@@ -101,6 +102,34 @@ export interface Expense {
   notes: string | null;
   recurring: boolean;
   source: TransactionSource;
+  explained?: boolean;
+  confidence?: number;
+  upi_reference?: string | null;
+  created_at: string;
+}
+
+// The weekly spend envelope + the L3 limits the agent acts inside.
+export interface AgentSettings {
+  user_id: string;
+  weekly_amount: number;
+  ask_ceiling: number;
+  payday_weekday: number; // 0=Sun … 6=Sat
+  auto_sweep: boolean;
+  savings_pool: number;
+  spend_balance: number;
+  last_sweep_at: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// A simulated money move (weekly sweep or mid-week top-up), logged.
+export interface Sweep {
+  id: string;
+  user_id: string;
+  amount: number;
+  kind: "weekly" | "topup";
+  note: string | null;
+  simulated: boolean;
   created_at: string;
 }
 

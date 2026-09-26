@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
+  AgentSettings,
   Budget,
   Expense,
   FinanceContext,
@@ -9,6 +10,7 @@ import type {
   Notification,
   Profile,
   Subscription,
+  Sweep,
 } from "./types";
 
 // Loads the full finance context for the authenticated user. RLS guarantees
@@ -82,6 +84,33 @@ export async function getProfile(): Promise<Profile | null> {
     .eq("id", user.id)
     .maybeSingle();
   return (data as Profile) ?? null;
+}
+
+// Loads the agent's weekly-envelope settings and the simulated sweep ledger.
+export async function getAgentData(): Promise<{
+  settings: AgentSettings | null;
+  sweeps: Sweep[];
+}> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { settings: null, sweeps: [] };
+
+  const [settings, sweeps] = await Promise.all([
+    supabase.from("agent_settings").select("*").eq("user_id", user.id).maybeSingle(),
+    supabase
+      .from("sweeps")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(12),
+  ]);
+
+  return {
+    settings: (settings.data as AgentSettings) ?? null,
+    sweeps: (sweeps.data as Sweep[]) ?? [],
+  };
 }
 
 export async function getNotifications(): Promise<Notification[]> {

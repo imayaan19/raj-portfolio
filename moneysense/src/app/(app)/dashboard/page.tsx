@@ -12,7 +12,7 @@ import {
   ArrowDownRight,
   Receipt,
 } from "lucide-react";
-import { getFinanceContext } from "@/lib/data";
+import { getFinanceContext, getAgentData } from "@/lib/data";
 import { generateInsight } from "@/lib/ai";
 import {
   categoryBreakdown,
@@ -22,6 +22,7 @@ import {
   addMonths,
   currentMonthKey,
 } from "@/lib/finance";
+import { explainedSpend, envelopeStatus } from "@/lib/agent";
 import { formatCurrency, formatPercent, signedPercent } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle, StatCard, Badge, EmptyState, Button } from "@/components/ui";
 import { DonutChart, BarChart } from "@/components/charts";
@@ -62,9 +63,12 @@ function greeting() {
 
 export default async function DashboardPage() {
   const { ctx } = await getFinanceContext();
+  const { settings } = await getAgentData();
   const currency = ctx.profile?.currency || "INR";
   const name = ctx.profile?.name?.split(" ")[0] || "there";
 
+  const es = explainedSpend(ctx);
+  const env = envelopeStatus(ctx, settings);
   const summary = monthSummary(ctx);
   const prev = monthSummary(ctx, addMonths(currentMonthKey(), -1));
   const surplus = surplusBreakdown(ctx);
@@ -96,6 +100,31 @@ export default async function DashboardPage() {
           </Link>
         }
       />
+
+      {/* Agent snapshot */}
+      <Link
+        href="/agent"
+        className="group flex flex-col gap-3 rounded-2xl border border-primary/30 bg-gradient-to-br from-accent to-card p-4 shadow-card transition-colors hover:bg-muted sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold">MoneySense Agent</p>
+            <p className="text-xs text-muted-foreground">
+              {Math.round(es.percent)}% of spend explained
+              {es.pendingCount > 0 ? ` · ${es.pendingCount} to sort` : " · all clear"}
+              {env.weeklyAmount > 0
+                ? ` · ${formatCurrency(Math.max(env.left, 0), currency)} left this week`
+                : ""}
+            </p>
+          </div>
+        </div>
+        <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+          Open agent <ArrowRight className="h-3.5 w-3.5" />
+        </span>
+      </Link>
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

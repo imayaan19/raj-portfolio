@@ -63,7 +63,10 @@ create table if not exists public.expenses (
   transaction_date date not null default current_date,
   notes            text,
   recurring        boolean default false,
-  source           text default 'Manual',    -- Manual | Receipt | Bank | Credit Card | UPI | SMS | Email
+  source           text default 'Manual',    -- Manual | Receipt | Bank | Credit Card | UPI | SMS | Email | Account Aggregator
+  explained        boolean default true,      -- accounted for? (drives the 95% explained-spend score)
+  confidence       numeric(4,3) default 1.0,  -- 0-1 auto-categorisation confidence
+  upi_reference    text,                       -- txn reference the "receipts rail" (Q5) keys on
   created_at       timestamptz default now()
 );
 create index if not exists expenses_user_date_idx on public.expenses (user_id, transaction_date desc);
@@ -149,6 +152,36 @@ create table if not exists public.recurring_transactions (
 create index if not exists recurring_user_idx on public.recurring_transactions (user_id);
 
 -- ---------------------------------------------------------------------------
+-- agent_settings  (the weekly spend envelope + L3 limits, 1:1 with user)
+-- ---------------------------------------------------------------------------
+create table if not exists public.agent_settings (
+  user_id        uuid primary key references auth.users(id) on delete cascade,
+  weekly_amount  numeric(14,2) default 0,
+  ask_ceiling    numeric(14,2) default 2000,
+  payday_weekday integer       default 1,     -- 0=Sun … 1=Mon … 6=Sat
+  auto_sweep     boolean       default true,
+  savings_pool   numeric(14,2) default 0,
+  spend_balance  numeric(14,2) default 0,
+  last_sweep_at  timestamptz,
+  created_at     timestamptz default now(),
+  updated_at     timestamptz default now()
+);
+
+-- ---------------------------------------------------------------------------
+-- sweeps  (simulated weekly/mid-week money moves — the L3 action, logged)
+-- ---------------------------------------------------------------------------
+create table if not exists public.sweeps (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  amount     numeric(14,2) not null default 0,
+  kind       text default 'weekly',           -- weekly | topup
+  note       text,
+  simulated  boolean default true,
+  created_at timestamptz default now()
+);
+create index if not exists sweeps_user_idx on public.sweeps (user_id, created_at desc);
+
+-- ---------------------------------------------------------------------------
 -- notifications
 -- ---------------------------------------------------------------------------
 create table if not exists public.notifications (
@@ -184,6 +217,8 @@ alter table public.subscriptions         enable row level security;
 alter table public.investments           enable row level security;
 alter table public.recurring_transactions enable row level security;
 alter table public.notifications         enable row level security;
+alter table public.agent_settings        enable row level security;
+alter table public.sweeps                enable row level security;
 alter table public.merchant_categories   enable row level security;
 
 -- profiles: user owns their profile row (id == auth.uid())
@@ -202,7 +237,8 @@ declare t text;
 begin
   foreach t in array array[
     'financial_profile','expenses','budgets','goals','subscriptions',
-    'investments','recurring_transactions','notifications'
+    'investments','recurring_transactions','notifications',
+    'agent_settings','sweeps'
   ]
   loop
     execute format('drop policy if exists "%s_select_own" on public.%I;', t, t);
