@@ -27,6 +27,7 @@ import {
 import { formatCurrency } from "@/lib/format";
 import { CATEGORIES } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
+import { DigestVoice } from "@/components/DigestVoice";
 import {
   Card,
   CardContent,
@@ -211,14 +212,12 @@ export default async function AgentPage() {
       {/* Monday digest */}
       <Card className="border-primary/30 bg-gradient-to-br from-accent to-card">
         <CardContent className="pt-5">
-          <div className="flex items-start gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Play className="h-5 w-5" />
-            </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+            <DigestVoice text={digest.message} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold">Monday digest</span>
-                <Badge tone="muted">30-sec voice note</Badge>
+                <Badge tone="muted">Voice note · Gnani in production</Badge>
               </div>
               <p className="mt-1.5 text-sm leading-relaxed text-foreground/90">
                 &ldquo;{digest.message}&rdquo;
