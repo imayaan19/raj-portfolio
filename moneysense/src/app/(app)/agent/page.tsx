@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Wallet,
   ShieldCheck,
@@ -8,6 +9,9 @@ import {
   Pause,
   Info,
   CheckCircle2,
+  Mic,
+  Rss,
+  ArrowRight,
 } from "lucide-react";
 import { getFinanceContext, getAgentData } from "@/lib/data";
 import {
@@ -28,6 +32,7 @@ import { formatCurrency } from "@/lib/format";
 import { CATEGORIES } from "@/lib/types";
 import { PageHeader } from "@/components/PageHeader";
 import { DigestVoice } from "@/components/DigestVoice";
+import { LedgerVoiceAsk } from "@/components/LedgerVoiceAsk";
 import {
   Card,
   CardContent,
@@ -109,7 +114,17 @@ export default async function AgentPage() {
       <PageHeader
         title="MoneySense Agent"
         description="Account for your spending automatically, and never run out before your weekly top-up."
-        action={<Badge tone="info">Autonomy L3</Badge>}
+        action={
+          <div className="flex items-center gap-3">
+            <Link
+              href="/how-it-works"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              How it works <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <Badge tone="info">Autonomy L3</Badge>
+          </div>
+        }
       />
 
       <Alert tone="info">
@@ -228,6 +243,50 @@ export default async function AgentPage() {
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Ask about your money (voice question node) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mic className="h-4 w-4" /> Ask about your money
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Ask by voice or text — answered from your tagged ledger and read back
+            aloud. (Browser voice here; Gnani in production.)
+          </p>
+          <LedgerVoiceAsk />
+        </CardContent>
+      </Card>
+
+      {/* Data-feed status (the U2 state) */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted">
+              <Rss className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Transaction feed</p>
+              <p className="text-xs text-muted-foreground">
+                {ctx.profile?.gmail_refresh_token
+                  ? `Connected${
+                      ctx.profile?.gmail_last_sync
+                        ? ` · last synced ${new Date(
+                            ctx.profile.gmail_last_sync
+                          ).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                        : ""
+                    }`
+                  : "Using demo data — connect Gmail in Settings for a live feed."}
+              </p>
+            </div>
+          </div>
+          <Badge tone={ctx.profile?.gmail_refresh_token ? "success" : "muted"}>
+            {ctx.profile?.gmail_refresh_token ? "Live" : "Demo"}
+          </Badge>
         </CardContent>
       </Card>
 
