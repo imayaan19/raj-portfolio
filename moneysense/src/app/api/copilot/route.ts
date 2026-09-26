@@ -55,10 +55,23 @@ export async function POST(request: Request) {
   try {
     const answer = await askCopilot(ctx, messages);
     return NextResponse.json({ answer });
-  } catch (e) {
+  } catch (e: any) {
     console.error("Copilot error", e);
+    // Surface the provider's actual reason (invalid key, unknown model, quota…)
+    // so misconfiguration is diagnosable instead of a generic failure.
+    const status = e?.status ?? e?.response?.status;
+    const providerMsg =
+      e?.error?.message ||
+      e?.response?.data?.error?.message ||
+      e?.message ||
+      "unknown error";
     return NextResponse.json(
-      { error: "The AI is unavailable right now. Please try again." },
+      {
+        error: `AI error${status ? ` (${status})` : ""}: ${String(providerMsg).slice(
+          0,
+          300
+        )}`,
+      },
       { status: 500 }
     );
   }
