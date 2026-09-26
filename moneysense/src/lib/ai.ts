@@ -18,14 +18,21 @@ import {
 
 export function hasOpenAI(): boolean {
   const key = process.env.OPENAI_API_KEY?.trim();
-  // Treat a missing key, or the .env.example placeholder, as "no key" so the
-  // app cleanly falls back to rule-based mode instead of calling OpenAI with an
-  // obviously-invalid key (which returns a 401).
-  return !!key && key.startsWith("sk-") && !key.includes("your-openai-key");
+  // Accept any real OpenAI-compatible key — OpenAI (sk-…), Groq (gsk_…),
+  // Google Gemini (AIza…), etc. Reject only a missing key or the placeholder,
+  // so the app cleanly falls back to rule-based mode instead of a 401.
+  return !!key && key.length > 20 && !key.includes("your-openai-key");
 }
 
+// Works with any OpenAI-compatible endpoint. Set OPENAI_BASE_URL to point at
+// Groq (https://api.groq.com/openai/v1) or Gemini
+// (https://generativelanguage.googleapis.com/v1beta/openai/); leave it unset
+// for OpenAI itself.
 function client(): OpenAI {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: process.env.OPENAI_BASE_URL || undefined,
+  });
 }
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
