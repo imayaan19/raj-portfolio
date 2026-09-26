@@ -108,6 +108,8 @@ export async function POST(request: Request) {
     notes: sender ? `Auto-imported from SMS (${sender})` : "Auto-imported from SMS",
     recurring: false,
     source: "SMS",
+    explained: false, // auto-imported → needs the user's confirmation
+    confidence: 0.5,
   });
   if (insertErr) {
     return NextResponse.json({ error: insertErr.message }, { status: 500 });

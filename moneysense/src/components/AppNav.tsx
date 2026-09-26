@@ -17,6 +17,7 @@ import {
   Settings,
   Bell,
   Sparkles,
+  Wallet,
   Menu,
   X,
   LogOut,
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils";
 
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/agent", label: "Agent", icon: Wallet },
   { href: "/transactions", label: "Transactions", icon: Receipt },
   { href: "/add", label: "Add Expense", icon: PlusCircle },
   { href: "/budgets", label: "Budgets", icon: PiggyBank },
@@ -40,10 +42,10 @@ export const NAV_ITEMS = [
 // Primary items shown in the mobile bottom bar.
 const MOBILE_ITEMS = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/transactions", label: "Activity", icon: Receipt },
+  { href: "/agent", label: "Agent", icon: Wallet },
   { href: "/add", label: "Add", icon: PlusCircle },
   { href: "/copilot", label: "Copilot", icon: Bot },
-  { href: "/investments", label: "Invest", icon: TrendingUp },
+  { href: "/transactions", label: "Activity", icon: Receipt },
 ];
 
 export function Sidebar({
