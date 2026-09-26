@@ -10,6 +10,7 @@
 // ===========================================================================
 
 import type { AgentSettings, Category, Expense, FinanceContext } from "./types";
+import { CATEGORIES } from "./types";
 import { currentMonthKey, monthKey, sum } from "./finance";
 
 // -------------------------- week helpers -----------------------------------
@@ -225,6 +226,93 @@ export interface SweepPlan {
   eligible: boolean;
   amount: number;
   reason: string;
+}
+
+// -------------------------- voice / ledger Q&A -----------------------------
+// Deterministic answers, drawn straight from the tagged ledger — no LLM, so it
+// works with zero API keys. This is the "anytime voice question" node.
+
+function rupee(n: number): string {
+  return `₹${Math.round(n).toLocaleString("en-IN")}`;
+}
+
+export function answerLedgerQuestion(
+  ctx: FinanceContext,
+  question: string,
+  settings: AgentSettings | null = null,
+  now = new Date()
+): string {
+  const q = (question || "").toLowerCase().trim();
+  if (!q) {
+    return "Ask me something like: how much did I spend on food this month?";
+  }
+
+  const wantsWeek = /\bweek\b/.test(q);
+  const weekday = settings?.payday_weekday ?? 1;
+  const weekStart = startOfWeek(now, weekday);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const monthExp = ctx.expenses.filter(
+    (e) => monthKey(e.transaction_date) === currentMonthKey(now)
+  );
+  const weekExp = ctx.expenses.filter((e) => {
+    const d = new Date(e.transaction_date);
+    const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return dd >= weekStart && dd <= today;
+  });
+  const scope = wantsWeek ? weekExp : monthExp;
+  const when = wantsWeek ? "this week" : "this month";
+
+  // Envelope / safe-to-spend.
+  if (/(left|safe to spend|envelope|remaining|budget left)/.test(q)) {
+    const env = envelopeStatus(ctx, settings, now);
+    if (env.weeklyAmount <= 0) return "You haven't set a weekly amount yet.";
+    return env.left >= 0
+      ? `You have ${rupee(env.left)} left of your ${rupee(env.weeklyAmount)} for the week.`
+      : `You're ${rupee(-env.left)} over your weekly amount.`;
+  }
+
+  // Unexplained / pending.
+  if (/(unexplained|pending|to explain|not sure|unknown)/.test(q)) {
+    const es = explainedSpend(ctx);
+    if (es.pendingCount === 0) return "Everything is explained — nothing pending.";
+    const top = es.pending[0];
+    return `${es.pendingCount} payment${es.pendingCount > 1 ? "s are" : " is"} still unexplained, the largest being ${rupee(
+      top.amount
+    )} to ${top.merchant || "an unknown payee"}.`;
+  }
+
+  // A specific category.
+  const cat = CATEGORIES.find((c) => q.includes(c.toLowerCase()));
+  if (cat) {
+    const items = scope.filter((e) => e.category === cat);
+    const total = sum(items.map((e) => e.amount));
+    if (total === 0) return `You haven't spent anything on ${cat.toLowerCase()} ${when}.`;
+    return `You spent ${rupee(total)} on ${cat.toLowerCase()} ${when}, across ${items.length} payment${
+      items.length > 1 ? "s" : ""
+    }.`;
+  }
+
+  // Biggest / where did my money go.
+  if (/(biggest|top|most|where|leak|go)/.test(q)) {
+    const byCat: Record<string, number> = {};
+    for (const e of scope) byCat[e.category] = (byCat[e.category] || 0) + e.amount;
+    const ranked = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    if (ranked.length === 0) return `No spending recorded ${when}.`;
+    const [c1, v1] = ranked[0];
+    const rest = ranked
+      .slice(1, 3)
+      .map(([c, v]) => `${c.toLowerCase()} ${rupee(v)}`)
+      .join(", ");
+    return `${when === "this week" ? "This week" : "This month"}, most went to ${c1.toLowerCase()} at ${rupee(
+      v1
+    )}${rest ? `, then ${rest}` : ""}.`;
+  }
+
+  // Total spend (fallback for "how much did I spend").
+  const total = sum(scope.map((e) => e.amount));
+  return `You've spent ${rupee(total)} ${when}, across ${scope.length} payment${
+    scope.length === 1 ? "" : "s"
+  }.`;
 }
 
 /** Would this week's automatic sweep run, and why / why not. */
